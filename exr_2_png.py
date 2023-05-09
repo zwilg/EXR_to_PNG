@@ -10,20 +10,6 @@ def gammaCorrection(src, gamma):
     invGamma = 1 / gamma
     return src ** invGamma
 
-def exr2png(filename:str, path_exr:Path, path_png:Path):
-    # Function provided by Mauhing Yip, NTNU
-    # 65536 = 2*16 - 1
-    exr_file_path = path_exr+"/"+filename+".exr"
-    png_file_path = path_png+"/"+filename+".png"
-    #exr_file_path = (path_exr/filename).with_suffix(".exr")
-    #png_file_path = (path_png/filename).with_suffix(".png")
-    im=cv2.imread(str(exr_file_path),-1)
-    im=im*65536
-    im[im>65535]=65535
-    im=np.uint16(im)
-    print("Writing to: ", str(png_file_path))
-    cv2.imwrite(str(png_file_path),im)
-
 def image_histogram_scaling(image, number_bins=256, scaling_upper_percentile=0.975):
     """
     image:                      2D array of iamge luminance values
