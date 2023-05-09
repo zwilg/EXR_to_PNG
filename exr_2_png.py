@@ -60,7 +60,6 @@ def image_histogram_scaling(image, number_bins=256, scaling_upper_percentile=0.9
 
     # Find the scaling factor by dividing the total number of bins by the bin number where the upper percentile threshold was reached.
     scaling_factor = number_bins/scaling_factor_bin_number
-    print(scaling_factor)
     return scaling_factor
 
 def find_scaling_factor(image_luminance, percentile):
@@ -91,6 +90,7 @@ def find_scaling_factor(image_luminance, percentile):
 
     return scaling_factor_low*scaling_factor_high
 
+
 def exr2png_scale_whitelevel(filename:str, path_exr:Path, path_png:Path, gamma, scaling_factor_old, scaling_upper_percentile, scaling_factor_delta_limit):
     """
     filename:                   Filename of image
@@ -108,6 +108,9 @@ def exr2png_scale_whitelevel(filename:str, path_exr:Path, path_png:Path, gamma, 
     exr_file_path = path_exr+"/"+filename
     png_file_path = path_png+"/"+filename[:-4]+"_equalized.png"
     im=cv2.imread(str(exr_file_path),-1)
+
+    # Apply gamma correction to .exr image with 32bit float precision
+    im = gammaCorrection(im, gamma)
 
     # Create grayscale image for luminance check on image w/ linear values
     _height = len(im[:,0,0]) # y, height
@@ -133,13 +136,13 @@ def exr2png_scale_whitelevel(filename:str, path_exr:Path, path_png:Path, gamma, 
     im = im*scaling_factor
 
     # Apply gamma correction to .exr image with 32bit float precision
-    im_gamma = gammaCorrection(im, gamma)
+    # im_gamma = gammaCorrection(im, gamma)
 
     # The following part of the function is provided by Mauhing Yip, NTNU.
-    # Convert image to 16bit integer values
-    im_gamma = im_gamma*65536
-    im_gamma[im_gamma>65535]=65535
-    im_gamma=np.uint16(im_gamma)
+    # Convert image to 16bit integer 
+    im = im*65536
+    im[im>65535]=65535
+    im=np.uint16(im)
 
     # Save image
     print("Saving image to: ", str(png_file_path))
@@ -152,6 +155,7 @@ if __name__ == "__main__":
     dir_path = os.path.abspath(os.path.dirname(os.path.abspath(__file__)))
     path_exr = dir_path + "/images_exr/"
     path_png = dir_path + "/images_png_converted-OpenCV/"
+    path_png_2 = dir_path + "/images_png_converted-OpenCV-Gamma_first/"
 
     # Create a list of the filenames for all files in the path_exr folder
     filenames = os.listdir(path_exr)
