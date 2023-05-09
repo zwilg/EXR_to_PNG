@@ -132,7 +132,7 @@ def exr2png_scale_whitelevel(filename:str, path_exr:Path, path_png:Path, gamma, 
 
     # Save image
     print("Saving image to: ", str(png_file_path))
-    cv2.imwrite(str(png_file_path),im_gamma)
+    cv2.imwrite(str(png_file_path),im)
     return scaling_factor
 
 
