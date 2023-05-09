@@ -91,20 +91,19 @@ def find_scaling_factor(image_luminance, percentile):
 
     return scaling_factor_low*scaling_factor_high
 
-def exr2png_equalized(filename:str, path_exr:Path, path_png:Path, gamma, scaling_factor_old, scaling_upper_percentile, scaling_factor_delta_limit):
+def exr2png_scale_whitelevel(filename:str, path_exr:Path, path_png:Path, gamma, scaling_factor_old, scaling_upper_percentile, scaling_factor_delta_limit):
     """
     filename:                   Filename of image
     path_exr:                   Path to EXR image folder
     path_png:                   Path to PNG image folder
     gamma:                      Gamma-value, standard value for srgb color-space is 2.2
-    scaling_factor_old:         Scaling factor used for the previous auto-exposure iteration. Used to limit the exposure 
+    scaling_factor_old:         Scaling factor used for the previous white level correction iteration. Used to limit the 
                                     change between each iteration.
-    scaling_upper_percentile:   Upper percentile of values which is clipped during the auto-exposure process. 
+    scaling_upper_percentile:   Upper percentile of values which is clipped during the white level correction process. 
     scaling_factor_delta_limit: Maximum change of the scaling factor between two iterations. A low value will result in 
-                                    more smooth auto-exposure between images (less abrubt changes in exposure between 
+                                    more smooth white level correction between images (less abrubt changes in exposure between 
                                     frames), however the risk of over/underexposure increases. 
     """
-    # Function provided by Mauhing Yip, NTNU - Modified by Peder Zwilgmeyer
 
     exr_file_path = path_exr+"/"+filename
     png_file_path = path_png+"/"+filename[:-4]+"_equalized.png"
@@ -136,6 +135,7 @@ def exr2png_equalized(filename:str, path_exr:Path, path_png:Path, gamma, scaling
     # Apply gamma correction to .exr image with 32bit float precision
     im_gamma = gammaCorrection(im, gamma)
 
+    # The following part of the function is provided by Mauhing Yip, NTNU.
     # Convert image to 16bit integer values
     im_gamma = im_gamma*65536
     im_gamma[im_gamma>65535]=65535
@@ -183,5 +183,5 @@ if __name__ == "__main__":
     for filename in filenames:
         #exr2png(filename, path_exr, path_png)
         print("filename: ", filename)
-        scaling_factors[scaling_factor_it+1] = exr2png_equalized(filename, path_exr, path_png, gamma, scaling_factors[scaling_factor_it], scaling_upper_percentile, scaling_factor_delta_limit)
+        scaling_factors[scaling_factor_it+1] = exr2png_scale_whitelevel(filename, path_exr, path_png, gamma, scaling_factors[scaling_factor_it], scaling_upper_percentile, scaling_factor_delta_limit)
         scaling_factor_it = scaling_factor_it + 1
